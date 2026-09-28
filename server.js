@@ -22,10 +22,20 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://sms-frontend-327mflaxj-abdur-rahman7.vercel.app", // ✅ CORRECT URL
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:5173",
+      ];
+      
+      // Allow all Vercel preview deployments
+      if (origin && origin.includes("vercel.app")) {
+        callback(null, true);
+      } else if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
