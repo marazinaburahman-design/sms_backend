@@ -1,8 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-dotenv.config();
 import cookieParser from "cookie-parser";
+
+dotenv.config();
 
 import connectDB from "./config/db.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
@@ -15,12 +16,11 @@ import courseInstructorRoutes from "./routes/courseInstructorRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 
-
-connectDB();  // ← ADD THIS LINE after dotenv.config()
+connectDB();
 
 const app = express();
 
-// Middleware
+// ✅ CORS Middleware - FIRST
 app.use(
   cors({
     origin: [
@@ -28,31 +28,17 @@ app.use(
       "https://sms-frontend-blond-six.vercel.app",
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ✅ Body Parser Middleware - ONCE
 app.use(express.json());
-
-
-app.use(express.json());
-
-// Handles JSON data sent by the frontend
-// Example: email and password
-// Access using: req.body.email, req.body.password
-
-
 app.use(express.urlencoded({ extended: true }));
-
-// Handles URL-encoded form data
-// Access using: req.body.username, req.body.email
-
-
 app.use(cookieParser());
 
-// Handles cookies sent by the browser
-// Access using: req.cookies.token, req.cookies.user
-
-// Routes
+// ✅ Routes
 app.get("/", (req, res) => {
   res.json({ message: "Student Management API is running" });
 });
@@ -66,10 +52,10 @@ app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/ai", aiRoutes);
 
+// ✅ Error Middleware - LAST
+app.use(errorMiddleware);
 
-app.use(errorMiddleware);  // ← ADD THIS before app.listen()
-
-// Start server
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
