@@ -23,11 +23,14 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
+      const allowedOrigins = [
         "http://localhost:5173",
       ];
       
-      if (allowedOrigins.includes(origin)) {
+      // Allow all Vercel preview deployments
+      if (origin && origin.includes("vercel.app")) {
+        callback(null, true);
+      } else if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
