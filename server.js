@@ -16,9 +16,10 @@ import courseInstructorRoutes from "./routes/courseInstructorRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 
-connectDB();
-
 const app = express();
+
+// Needed on Vercel so secure cookies work behind the proxy
+app.set("trust proxy", 1);
 
 // ✅ CORS
 const allowedOrigins = [
@@ -32,7 +33,7 @@ const previewRegex = /^https:\/\/sms-frontend.*-abdur-rahman7\.vercel\.app$/;
 app.use(
   cors({
     origin: (origin, callback) => {
-      // No Origin header = direct browser visit, health chfseck, curl
+      // No Origin header = direct browser visit, health check, curl
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin) || previewRegex.test(origin)) {
@@ -52,6 +53,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ✅ Make sure the DB is connected before any route runs
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ message: "Database connection failed" });
+  }
+});
 
 // ✅ Routes
 app.get("/", (req, res) => {
