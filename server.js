@@ -24,9 +24,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://sms-frontend-blond-six.vercel.app",
-      "https://sms-frontend-rjtijsg9m-abdur-rahman7.vercel.app",
-      // Add other specific preview URLs as needed
+      "https://sms-frontend-blond-six.vercel.app"     
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
