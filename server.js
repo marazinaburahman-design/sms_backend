@@ -20,21 +20,27 @@ connectDB();
 
 const app = express();
 
+// ✅ CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.CLIENT_URL?.trim().replace(/\/$/, ""),
+].filter(Boolean);
+
+// Only YOUR frontend's preview deployments (not every site on vercel.app)
+const previewRegex = /^https:\/\/sms-frontend.*-abdur-rahman7\.vercel\.app$/;
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:5173",
-      ];
-      
-      // Allow all Vercel preview deployments
-      if (origin && origin.includes("vercel.app")) {
-        callback(null, true);
-      } else if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
+      // No Origin header = direct browser visit, health chfseck, curl
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin) || previewRegex.test(origin)) {
+        return callback(null, true);
       }
+
+      // Block without throwing (avoids a 500 error)
+      return callback(null, false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -64,8 +70,12 @@ app.use("/api/ai", aiRoutes);
 // ✅ Error Middleware - LAST
 app.use(errorMiddleware);
 
-// ✅ Start Server
+// ✅ Start Server (Vercel runs the exported app itself)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
