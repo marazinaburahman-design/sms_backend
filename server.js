@@ -22,25 +22,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:5173",
-      ];
-      
-      // Allow all Vercel preview deployments
-      if (origin && origin.includes("vercel.app")) {
-        callback(null, true);
-      } else if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: [
+      "http://localhost:5173",
+      "https://sms-frontend-blond-six.vercel.app",
+      "https://sms-frontend-rjtijsg9m-abdur-rahman7.vercel.app",
+      // Add other specific preview URLs as needed
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
-);
+);;
 
 // ✅ Body Parser Middleware - ONCE
 app.use(express.json());
